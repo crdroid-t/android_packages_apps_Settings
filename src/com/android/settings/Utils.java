@@ -162,6 +162,9 @@ public final class Utils extends com.android.settingslib.Utils {
     public static final String PROPERTY_HIBERNATION_TARGETS_PRE_S_APPS =
             "app_hibernation_targets_pre_s_apps";
 
+    /** Store PIN/Password length for quick unlock **/
+    public static final String PIN_PASSWORD_LENGTH = "lockscreen.pin_password_length";
+
     /**
      * Finds a matching activity for a preference's intent. If a matching
      * activity is not found, it will remove the preference.
@@ -1240,10 +1243,21 @@ public final class Utils extends com.android.settingslib.Utils {
     public static int getPINPasswordLength(LockPatternUtils lockPatternUtils, int userId) {
         int pinLength = 0;
         try {
-            pinLength = lockPatternUtils.getLockSettings().getCredentialLength(userId);
+            pinLength = (int) lockPatternUtils.getLockSettings().getLong(PIN_PASSWORD_LENGTH, 0, userId);
         } catch (Exception e) {
             Log.d("getPINPasswordLength", "getLong error: " + e.getMessage());
         }
-        return pinLength;
+        if (pinLength >= 4) {
+            return pinLength;
+        }
+        return 0;
+    }
+
+    public static void savePINPasswordLength(LockPatternUtils lockPatternUtils, int length, int userId) {
+        try {
+            lockPatternUtils.getLockSettings().setLong(PIN_PASSWORD_LENGTH, (long) length, userId);
+        } catch (Exception e) {
+            Log.d("savePINPasswordLength", "saveLong error: " + e.getMessage());
+        }
     }
 }
